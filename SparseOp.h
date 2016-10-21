@@ -1,12 +1,4 @@
 
-#ifndef _SparseOp_
-#define _SparseOp_
-
-// Toggle off asserts if not in debug mode
-#ifndef  _DEBUG
-#define _NDEBUG
-#endif
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -15,7 +7,18 @@
 #include <cassert>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 using namespace std;
+
+
+#ifndef _SparseOp_
+#define _SparseOp_
+
+// Toggle off asserts if not in debug mode
+#ifndef  _DEBUG
+#define _NDEBUG
+#endif
+
 
 
 #define  INITIAL_ROWSIZE       10
@@ -211,6 +214,8 @@ void initialize()
     rowFilledSizes = 0;
     dropTol        = 0.0;
     
+    colCount       = 0;
+
     initialRowSize     = INITIAL_ROWSIZE;
     rowExpansionFactor = ROW_EXPANSION_FACTOR;
 
@@ -327,6 +332,67 @@ double dropTolerance = 0.0)
     totalInitialCount = 0;
 }
 
+
+/*!
+Specifies the value of of the (rowIndex,colIndex) element of the matrix.
+Since this routine does not check if an existing element exists before
+insertion and any collections of invocations must consist of
+unique (i,j) pairs.
+
+
+<pre>
+abs(coeffValue) < dropTolerance
+</pre>
+e.g. the value is ignored.
+*/
+
+void assumedUniqueSetOperatorData(long rowIndex, long colIndex, double coeffValue)
+{
+    // Bounds checking if _DEBUG defined
+
+    assert(boundsCheck(rowIndex, 0, rowCount-1,1));
+    assert(boundsCheck(colIndex, 0, colCount-1,2));
+
+    long j;
+
+    totalInitialCount += 1;
+    if(rowIndexCache == -1)
+    {
+      rowIndexCache = rowIndex;
+    }
+
+    if(abs(coeffValue) < dropTol)
+    {
+        totalDroppedCount += 1;
+        return;
+    }
+
+    totalDataCount  += 1;
+    long index = rowFilledSizes[rowIndex];
+
+    if(index >= rowSizes[rowIndex])
+    {
+    	repackFlag = 0;
+        resizeRow(rowIndex);
+    }
+
+    coeffValues[rowIndex][index]   = coeffValue;
+    coeffColIndex[rowIndex][index] = colIndex;
+    rowFilledSizes[rowIndex]++;
+
+    //
+    // Repack row if we've moved to a different row
+    //
+    if(rowIndex != rowIndexCache)
+    {
+       repackFlag = 1;
+       resizeRow(rowIndexCache);
+       rowIndexCache = rowIndex;
+    }
+}
+
+
+
 /*!
 Specifies the value of of the (rowIndex,colIndex) element of the matrix. Any existing value
 is overwritten. If a non-zero value of dropTolerance is specified, then this operator is a no-op
@@ -427,7 +493,7 @@ class SparseOpRef
 {
         public:
 
-        /// Used for extraction of SparseOp element valu
+        /// Used for extraction of SparseOp element value
 
         operator double() const
         {
@@ -445,6 +511,18 @@ class SparseOpRef
         }
 
         /// Used to insert or update a value into SparseOp instance
+
+
+        void operator=(const SparseOpRef& R)
+        {
+            double value = (double)R;
+
+            assert(sparseOpPtr->boundsCheck(i, 0, sparseOpPtr->rowCount-1,1));
+            assert(sparseOpPtr->boundsCheck(j, 0, sparseOpPtr->colCount-1,2));
+
+            sparseOpPtr->setOperatorData(i,j,value);
+        }
+
 
         void operator=(double value)
         {
