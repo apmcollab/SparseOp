@@ -16,7 +16,7 @@ using namespace std;
 
 // Toggle off asserts if not in debug mode
 #ifndef  _DEBUG
-#define _NDEBUG
+#define NDEBUG
 #endif
 
 
