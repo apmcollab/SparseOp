@@ -8,6 +8,8 @@
  * of a linear operator on the grid data. 
  *
  */
+namespace SCC
+{
 class IndexMap1d
 {
 public :
@@ -37,5 +39,5 @@ public :
 
     long xDim;
 };
-
+} // Namespace SCC 
 #endif

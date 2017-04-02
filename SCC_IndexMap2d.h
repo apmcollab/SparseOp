@@ -8,6 +8,8 @@
  * of a linear operator on the grid data.
  *
  */
+namespace SCC
+{
 class IndexMap2d
 {
 public :
@@ -42,4 +44,5 @@ public :
 
 	long xDim; long yDim;
 };
+}
 #endif

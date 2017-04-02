@@ -98,7 +98,8 @@ using namespace std;
 #############################################################################
 */
 
-
+namespace SCC
+{
 template <class Vtype> class SparseOp
 {
     
@@ -296,6 +297,12 @@ row is exceeded.
 
 If a non-zero dropTolerance value is specified any element specified with an absolute value less
 dropTolerance is ignored.
+
+
+<pre>
+abs(coeffValue) < dropTolerance
+</pre>
+e.g. the value is ignored.
 */
 
 void initialize(long rowDimension, long colDimension, long initialRowSize, double rowExpansionFactor,
@@ -335,15 +342,13 @@ double dropTolerance = 0.0)
 
 /*!
 Specifies the value of of the (rowIndex,colIndex) element of the matrix.
-Since this routine does not check if an existing element exists before
-insertion and any collections of invocations must consist of
-unique (i,j) pairs.
+This routine does not check if an existing element exists before
+insertion. Any collection of invocations must consist of
+unique (i,j) pairs. 
 
+This method exists because insertion without having to check for existing elements 
+can save a great deal of time in matrix assembly. 
 
-<pre>
-abs(coeffValue) < dropTolerance
-</pre>
-e.g. the value is ignored.
 */
 
 void assumedUniqueSetOperatorData(long rowIndex, long colIndex, double coeffValue)
@@ -1534,4 +1539,5 @@ int  rowIndexCache;
 int     repackFlag;
 
 };
+}
 #endif 
