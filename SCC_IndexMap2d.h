@@ -1,15 +1,16 @@
 #ifndef _IndexMap2d_
 #define _IndexMap2d_
 
-/**
+
+namespace SCC
+{
+/*!
  *                       Class IndexMap2d
  * This class maps the 2d vector index associated with the rectangular grid data
  * values to the linear index associated with a matrix representation
  * of a linear operator on the grid data.
  *
  */
-namespace SCC
-{
 class IndexMap2d
 {
 public :
