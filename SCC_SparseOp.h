@@ -27,6 +27,11 @@ using namespace std;
 //####################################################################
 //                     SparseOp.h
 //####################################################################
+
+
+namespace SCC
+{
+
 /*!
    \brief Sparse matrix representation of finite dimensional linear operators.
 
@@ -98,8 +103,6 @@ using namespace std;
 #############################################################################
 */
 
-namespace SCC
-{
 template <class Vtype> class SparseOp
 {
     
