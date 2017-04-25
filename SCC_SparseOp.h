@@ -361,8 +361,6 @@ void assumedUniqueSetOperatorData(long rowIndex, long colIndex, double coeffValu
     assert(boundsCheck(rowIndex, 0, rowCount-1,1));
     assert(boundsCheck(colIndex, 0, colCount-1,2));
 
-    long j;
-
     totalInitialCount += 1;
     if(rowIndexCache == -1)
     {
@@ -1080,7 +1078,7 @@ void createLowerTriComponent(SparseOp& L)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex <  i) L(i,jIndex) = coeffValues[i][j];
+            if(jIndex <  i) L.assumedUniqueSetOperatorData(i,jIndex,coeffValues[i][j]);
         }
     }
     L.compact();
@@ -1105,7 +1103,7 @@ void createUpperTriComponent(SparseOp& U)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex > i) U(i,jIndex) = coeffValues[i][j];
+            if(jIndex > i) U.assumedUniqueSetOperatorData(i,jIndex,coeffValues[i][j]);
         }
     }
 
@@ -1130,7 +1128,7 @@ void createDiagComponent(SparseOp& D)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex == i) D(i,jIndex) = coeffValues[i][j];
+            if(jIndex == i) D.assumedUniqueSetOperatorData(i,jIndex,coeffValues[i][j]);
         }
     }
     D.compact();

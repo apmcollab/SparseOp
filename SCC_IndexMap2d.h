@@ -15,10 +15,33 @@ class IndexMap2d
 {
 public :
 
-/*! Constructs index map for a grid with xDim values in the first coordinate direction 
-    and yDmin values in the second coordinate direction.
+/*! Null Constructor.
+*/
+	IndexMap2d()
+	{
+	this->xDim = 0;
+	this->yDim = 0;
+	}
+
+/*! Copy Constructor.
+*/
+	IndexMap2d(const IndexMap2d& iMap)
+	{
+	this->xDim = iMap.xDim;
+	this->yDim = iMap.yDim;
+	}
+
+/*! Constructs index map for a grid with xDim values in the first coordinate direction and yDmin values in the second coordinate direction.
 */
 	IndexMap2d(long xDim, long yDim)
+	{
+	this->xDim = xDim;
+	this->yDim = yDim;
+	}
+
+/*! Initialize index map for a grid with xDim values in the first coordinate direction and yDmin values in the second coordinate direction.
+*/
+	void initialize(long xDim, long yDim)
 	{
 	this->xDim = xDim;
 	this->yDim = yDim;
