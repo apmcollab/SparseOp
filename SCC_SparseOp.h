@@ -1059,6 +1059,33 @@ void createTranspose(SparseOp& S) const
     S.rowExpansionFactor = rowExpansionFactor;
 }
 
+bool isSymmetric(double relTol = 1.0e-15)
+{
+    double maxDiff = 0.0;
+    double maxNrm  = 0.0;
+    double diff;
+    double          Val;
+    double transposeVal;
+
+    long colIndex;
+    for(long i = 0; i < rowCount; i++)
+    {
+    for(long k = 0; k < rowFilledSizes[i]; k++)
+    {
+    	colIndex  = coeffColIndex[i][k];
+    	Val          = this->operator()(i,colIndex);
+    	transposeVal = this->operator()(colIndex,i);
+    	maxNrm  = (abs(Val) > abs(transposeVal)) ? abs(Val) : abs(transposeVal);
+
+    	diff    =  abs(Val - transposeVal)/(.00001 + maxNrm);
+
+        maxDiff = (maxDiff > diff) ? maxDiff : diff;
+    }}
+
+    if(maxDiff > relTol) return false;
+    return true;
+}
+
 /*!
 This method initializes the input SparseOp argument with the lower triangular
 component of the invoking instance, e.g. e.g. the L part of the decomposition
