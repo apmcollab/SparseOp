@@ -1,7 +1,10 @@
 #ifndef _IndexMap2d_
 #define _IndexMap2d_
 
-/**
+
+namespace SCC
+{
+/*!
  *                       Class IndexMap2d
  * This class maps the 2d vector index associated with the rectangular grid data
  * values to the linear index associated with a matrix representation
@@ -12,10 +15,33 @@ class IndexMap2d
 {
 public :
 
-/*! Constructs index map for a grid with xDim values in the first coordinate direction 
-    and yDmin values in the second coordinate direction.
+/*! Null Constructor.
+*/
+	IndexMap2d()
+	{
+	this->xDim = 0;
+	this->yDim = 0;
+	}
+
+/*! Copy Constructor.
+*/
+	IndexMap2d(const IndexMap2d& iMap)
+	{
+	this->xDim = iMap.xDim;
+	this->yDim = iMap.yDim;
+	}
+
+/*! Constructs index map for a grid with xDim values in the first coordinate direction and yDmin values in the second coordinate direction.
 */
 	IndexMap2d(long xDim, long yDim)
+	{
+	this->xDim = xDim;
+	this->yDim = yDim;
+	}
+
+/*! Initialize index map for a grid with xDim values in the first coordinate direction and yDmin values in the second coordinate direction.
+*/
+	void initialize(long xDim, long yDim)
 	{
 	this->xDim = xDim;
 	this->yDim = yDim;
@@ -42,4 +68,5 @@ public :
 
 	long xDim; long yDim;
 };
+}
 #endif
