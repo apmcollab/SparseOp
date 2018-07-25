@@ -1,7 +1,10 @@
 #ifndef _IndexMap1d_
 #define _IndexMap1d_
 
-/**
+
+namespace SCC
+{
+/*!
  *                       Class IndexMap1d
  * This class maps the vector index associated with rectangular grid data
  * values to the linear index associated with a matrix representation
@@ -37,5 +40,5 @@ public :
 
     long xDim;
 };
-
+} // Namespace SCC 
 #endif

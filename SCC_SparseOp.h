@@ -1,12 +1,4 @@
 
-#ifndef _SparseOp_
-#define _SparseOp_
-
-// Toggle off asserts if not in debug mode
-#ifndef  _DEBUG
-#define _NDEBUG
-#endif
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -15,7 +7,18 @@
 #include <cassert>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 using namespace std;
+
+
+#ifndef _SparseOp_
+#define _SparseOp_
+
+// Toggle off asserts if not in debug mode
+#ifndef  _DEBUG
+#define NDEBUG
+#endif
+
 
 
 #define  INITIAL_ROWSIZE       10
@@ -24,6 +27,11 @@ using namespace std;
 //####################################################################
 //                     SparseOp.h
 //####################################################################
+
+
+namespace SCC
+{
+
 /*!
    \brief Sparse matrix representation of finite dimensional linear operators.
 
@@ -94,7 +102,6 @@ using namespace std;
 #
 #############################################################################
 */
-
 
 template <class Vtype> class SparseOp
 {
@@ -211,6 +218,8 @@ void initialize()
     rowFilledSizes = 0;
     dropTol        = 0.0;
     
+    colCount       = 0;
+
     initialRowSize     = INITIAL_ROWSIZE;
     rowExpansionFactor = ROW_EXPANSION_FACTOR;
 
@@ -291,6 +300,12 @@ row is exceeded.
 
 If a non-zero dropTolerance value is specified any element specified with an absolute value less
 dropTolerance is ignored.
+
+
+<pre>
+abs(coeffValue) < dropTolerance
+</pre>
+e.g. the value is ignored.
 */
 
 void initialize(long rowDimension, long colDimension, long initialRowSize, double rowExpansionFactor,
@@ -326,6 +341,63 @@ double dropTolerance = 0.0)
     totalDroppedCount = 0;
     totalInitialCount = 0;
 }
+
+
+/*!
+Specifies the value of of the (rowIndex,colIndex) element of the matrix.
+This routine does not check if an existing element exists before
+insertion. Any collection of invocations must consist of
+unique (i,j) pairs. 
+
+This method exists because insertion without having to check for existing elements 
+can save a great deal of time in matrix assembly. 
+
+*/
+
+void assumedUniqueSetOperatorData(long rowIndex, long colIndex, double coeffValue)
+{
+    // Bounds checking if _DEBUG defined
+
+    assert(boundsCheck(rowIndex, 0, rowCount-1,1));
+    assert(boundsCheck(colIndex, 0, colCount-1,2));
+
+    totalInitialCount += 1;
+    if(rowIndexCache == -1)
+    {
+      rowIndexCache = rowIndex;
+    }
+
+    if(abs(coeffValue) < dropTol)
+    {
+        totalDroppedCount += 1;
+        return;
+    }
+
+    totalDataCount  += 1;
+    long index = rowFilledSizes[rowIndex];
+
+    if(index >= rowSizes[rowIndex])
+    {
+    	repackFlag = 0;
+        resizeRow(rowIndex);
+    }
+
+    coeffValues[rowIndex][index]   = coeffValue;
+    coeffColIndex[rowIndex][index] = colIndex;
+    rowFilledSizes[rowIndex]++;
+
+    //
+    // Repack row if we've moved to a different row
+    //
+    if(rowIndex != rowIndexCache)
+    {
+       repackFlag = 1;
+       resizeRow(rowIndexCache);
+       rowIndexCache = rowIndex;
+    }
+}
+
+
 
 /*!
 Specifies the value of of the (rowIndex,colIndex) element of the matrix. Any existing value
@@ -427,7 +499,7 @@ class SparseOpRef
 {
         public:
 
-        /// Used for extraction of SparseOp element valu
+        /// Used for extraction of SparseOp element value
 
         operator double() const
         {
@@ -445,6 +517,18 @@ class SparseOpRef
         }
 
         /// Used to insert or update a value into SparseOp instance
+
+
+        void operator=(const SparseOpRef& R)
+        {
+            double value = (double)R;
+
+            assert(sparseOpPtr->boundsCheck(i, 0, sparseOpPtr->rowCount-1,1));
+            assert(sparseOpPtr->boundsCheck(j, 0, sparseOpPtr->colCount-1,2));
+
+            sparseOpPtr->setOperatorData(i,j,value);
+        }
+
 
         void operator=(double value)
         {
@@ -975,6 +1059,33 @@ void createTranspose(SparseOp& S) const
     S.rowExpansionFactor = rowExpansionFactor;
 }
 
+bool isSymmetric(double relTol = 1.0e-15)
+{
+    double maxDiff = 0.0;
+    double maxNrm  = 0.0;
+    double diff;
+    double          Val;
+    double transposeVal;
+
+    long colIndex;
+    for(long i = 0; i < rowCount; i++)
+    {
+    for(long k = 0; k < rowFilledSizes[i]; k++)
+    {
+    	colIndex  = coeffColIndex[i][k];
+    	Val          = this->operator()(i,colIndex);
+    	transposeVal = this->operator()(colIndex,i);
+    	maxNrm  = (abs(Val) > abs(transposeVal)) ? abs(Val) : abs(transposeVal);
+
+    	diff    =  abs(Val - transposeVal)/(.00001 + maxNrm);
+
+        maxDiff = (maxDiff > diff) ? maxDiff : diff;
+    }}
+
+    if(maxDiff > relTol) return false;
+    return true;
+}
+
 /*!
 This method initializes the input SparseOp argument with the lower triangular
 component of the invoking instance, e.g. e.g. the L part of the decomposition
@@ -994,7 +1105,7 @@ void createLowerTriComponent(SparseOp& L)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex <  i) L(i,jIndex) = coeffValues[i][j];
+            if(jIndex <  i) L.assumedUniqueSetOperatorData(i,jIndex,coeffValues[i][j]);
         }
     }
     L.compact();
@@ -1019,7 +1130,7 @@ void createUpperTriComponent(SparseOp& U)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex > i) U(i,jIndex) = coeffValues[i][j];
+            if(jIndex > i) U.assumedUniqueSetOperatorData(i,jIndex,coeffValues[i][j]);
         }
     }
 
@@ -1044,7 +1155,7 @@ void createDiagComponent(SparseOp& D)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex == i) D(i,jIndex) = coeffValues[i][j];
+            if(jIndex == i) D.assumedUniqueSetOperatorData(i,jIndex,coeffValues[i][j]);
         }
     }
     D.compact();
@@ -1456,4 +1567,5 @@ int  rowIndexCache;
 int     repackFlag;
 
 };
+}
 #endif 
