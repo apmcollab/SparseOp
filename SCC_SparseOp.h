@@ -8,18 +8,18 @@
 #include <vector>
 #include <cstdlib>
 #include <iostream>
-using namespace std;
+
+#ifdef  _DEBUG
+#include <cstdio>
+#else
+#ifndef NDEBUG
+#define NDEBUG
+#endif
+#endif
 
 
 #ifndef _SparseOp_
 #define _SparseOp_
-
-// Toggle off asserts if not in debug mode
-#ifndef  _DEBUG
-#define NDEBUG
-#endif
-
-
 
 #define  INITIAL_ROWSIZE       10
 #define  ROW_EXPANSION_FACTOR  2.0
@@ -367,7 +367,7 @@ void assumedUniqueSetOperatorData(long rowIndex, long colIndex, double coeffValu
       rowIndexCache = rowIndex;
     }
 
-    if(abs(coeffValue) < dropTol)
+    if(std::abs(coeffValue) < dropTol)
     {
         totalDroppedCount += 1;
         return;
@@ -424,7 +424,7 @@ void setOperatorData(long rowIndex, long colIndex, double coeffValue)
       rowIndexCache = rowIndex;
     }
     
-    if(fabs(coeffValue) < dropTol)
+    if(std::abs(coeffValue) < dropTol)
     {
         totalDroppedCount += 1;
         return;
@@ -751,7 +751,7 @@ The optional input format string specifies the format of a single entry using C 
 
 void printMatrix(std::string format = "%10.5e") const
 {
-    ostringstream  formatString(ostringstream::out);
+    std::ostringstream  formatString(std::ostringstream::out);
     formatString.str(std::string());
     formatString << format << " ";
 
@@ -959,7 +959,7 @@ SparseOp& operator*=(const SparseOp& rhs)
                         sum += coeffValues[i][eye] * rhs.coeffValues[j][jay];
                 }
             }
-            if(fabs(sum) > this->dropTol)
+            if(std::abs(sum) > this->dropTol)
                 result.setOperatorData(i,j,sum);
         }
     }
@@ -1075,9 +1075,9 @@ bool isSymmetric(double relTol = 1.0e-15)
     	colIndex  = coeffColIndex[i][k];
     	Val          = this->operator()(i,colIndex);
     	transposeVal = this->operator()(colIndex,i);
-    	maxNrm  = (abs(Val) > abs(transposeVal)) ? abs(Val) : abs(transposeVal);
+    	maxNrm  = (std::abs(Val) > std::abs(transposeVal)) ? std::abs(Val) : std::abs(transposeVal);
 
-    	diff    =  abs(Val - transposeVal)/(.00001 + maxNrm);
+    	diff    =  std::abs(Val - transposeVal)/(.00001 + maxNrm);
 
         maxDiff = (maxDiff > diff) ? maxDiff : diff;
     }}
@@ -1198,11 +1198,11 @@ void applyLowerTriInverse(Vtype& V)
              Vsum += V(i);
              }
         }
-        if(abs(diag) < 1.0e-99)
+        if(std::abs(diag) < 1.0e-99)
         {
-        cerr << "Error in SparseOp applyLowerTriInverse(...) " << endl;
-        cerr << "Diagonal element < 1.0e-99 " << endl;
-        cerr << "Row : " << i << endl;
+        std::cerr << "Error in SparseOp applyLowerTriInverse(...) " << std::endl;
+        std::cerr << "Diagonal element < 1.0e-99 " << std::endl;
+        std::cerr << "Row : " << i << std::endl;
         exit(0);
         }
         V(i) = Vsum/diag;
@@ -1246,11 +1246,11 @@ void applyUpperTriInverse(Vtype& V)
              Vsum += V(i);
              }
         }
-        if(abs(diag) < 1.0e-99)
+        if(std::abs(diag) < 1.0e-99)
         {
-        cerr << "Error in SparseOp applyUpperTriInverse(...) " << endl;
-        cerr << "Diagonal element < 1.0e-99 " << endl;
-        cerr << "Row : " << i << endl;
+        std::cerr << "Error in SparseOp applyUpperTriInverse(...) " << std::endl;
+        std::cerr << "Diagonal element < 1.0e-99 " << std::endl;
+        std::cerr << "Row : " << i << std::endl;
         exit(0);
         }
         V(i) = Vsum/diag;
@@ -1306,7 +1306,7 @@ void printMatrixStructure() const
     {
     for(j = 0; j < colCount; j++)
     {
-    if(abs(S[j+ i*colCount])  == 0.0) printf("-");
+    if(std::abs(S[j+ i*colCount])  == 0.0) printf("-");
     else                              printf("+");
     }
     printf("\n");
@@ -1460,8 +1460,8 @@ public:
         {
         if((i < begin)||(i  > end))
         {
-        cerr << "SparseOp index " << coordinate << " out of bounds " << endl;
-        cerr << "Offending index value : " << i << " Acceptable Range [" << begin << "," << end << "]" << endl;
+        std::cerr << "SparseOp index " << coordinate << " out of bounds " << std::endl;
+        std::cerr << "Offending index value : " << i << " Acceptable Range [" << begin << "," << end << "]" << std::endl;
         return false;
         }
         return true;
@@ -1474,16 +1474,16 @@ public:
         {
         if(aCol != vInSize)
         {
-        cerr << "SparseOp incompatible matrix-vector multiplication sizes " <<  endl;
-        cerr << "Left  operand ["<< aRow    << " X " << aCol << "]" << endl;
-        cerr << "Right operand ["<< vInSize << " X " << 1 << "]" << endl;
+        std::cerr << "SparseOp incompatible matrix-vector multiplication sizes " <<  std::endl;
+        std::cerr << "Left  operand ["<< aRow    << " X " << aCol << "]" << std::endl;
+        std::cerr << "Right operand ["<< vInSize << " X " << 1 << "]" << std::endl;
         return false;
         }
         if(aRow != vOutSize)
         {
-        cerr << "SparseOp incompatible matrix-vector multiplication return size" <<  endl;
-        cerr << "Matrix size         : ["<< aRow    << " X " << aCol << "]" << endl;
-        cerr << "Return vector Size :  ["<< vOutSize << " X " << 1 << "]"   << endl;
+        std::cerr << "SparseOp incompatible matrix-vector multiplication return size" <<  std::endl;
+        std::cerr << "Matrix size         : ["<< aRow    << " X " << aCol << "]" << std::endl;
+        std::cerr << "Return vector Size :  ["<< vOutSize << " X " << 1 << "]"   << std::endl;
         return false;
         }
         return true;
@@ -1496,9 +1496,9 @@ public:
         {
         if(aCol != bRow)
         {
-        cerr << "SparseOp incompatible matrix sizes " <<  endl;
-        cerr << "Left  operand ["<< aRow << " X " << aCol << "]" << endl;
-        cerr << "Right operand ["<< bRow << " X " << bCol << "]" << endl;
+        std::cerr << "SparseOp incompatible matrix sizes " <<  std::endl;
+        std::cerr << "Left  operand ["<< aRow << " X " << aCol << "]" << std::endl;
+        std::cerr << "Right operand ["<< bRow << " X " << bCol << "]" << std::endl;
         return false;
         }
         return true;
@@ -1511,9 +1511,9 @@ public:
         {
         if((aRow != bRow)||(aCol != bCol))
         {
-        cerr << "SparseOp incompatible matrix sizes " <<  endl;
-        cerr << "Left  operand ["<< aRow << " X " << aCol << "]" << endl;
-        cerr << "Right operand ["<< bRow << " X " << bCol << "]" << endl;
+        std::cerr << "SparseOp incompatible matrix sizes " <<  std::endl;
+        std::cerr << "Left  operand ["<< aRow << " X " << aCol << "]" << std::endl;
+        std::cerr << "Right operand ["<< bRow << " X " << bCol << "]" << std::endl;
         return false;
         }
         return true;
