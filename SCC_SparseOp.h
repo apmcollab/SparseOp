@@ -18,8 +18,8 @@
 #endif
 
 
-#ifndef _SparseOp_
-#define _SparseOp_
+#ifndef SCC_SPARSE_OP_
+#define SCC_SPARSE_OP_
 
 #define  INITIAL_ROWSIZE       10
 #define  ROW_EXPANSION_FACTOR  2.0

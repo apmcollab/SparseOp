@@ -1,5 +1,5 @@
-#ifndef _IndexMap1d_
-#define _IndexMap1d_
+#ifndef INDEX_MAP_1D_
+#define INDEX_MAP_1D_
 
 
 namespace SCC
