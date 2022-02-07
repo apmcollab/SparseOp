@@ -17,6 +17,10 @@
 #endif
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 #ifndef SCC_SPARSE_OP_
 #define SCC_SPARSE_OP_
@@ -643,6 +647,26 @@ void apply(Vtype& V)
     }
 }
 
+void apply(std::vector<Vtype>& Varray)
+{
+    assert(matrixVectorDimCheck(rowCount,colCount,Varray[0].getSize(), V[0].getSize()));
+    vArrayTmp = Varray;
+ 
+#ifdef _OPENMP
+       #pragma omp parallel for
+#endif
+    for(size_t p = 0; p < Varray.size(); p++)
+    {
+    for(long i = 0; i < rowCount; i++)
+    {
+        Varray[p](i) = 0.0;
+        for(long j = 0; j < rowFilledSizes[i]; j++)
+        {
+            Varray[p](i) += vArrayTmp[p](coeffColIndex[i][j])*coeffValues[i][j];
+        }
+    }
+    }
+}
 
 /*!
 This method overwrites Vout with the values of S*Vin where S is this
@@ -1561,7 +1585,8 @@ long    totalDroppedCount; // the total number of elements dropped
 double** coeffValues;     // array to hold pointers to coefficient values arrays
 long**   coeffColIndex;   // array to hold pointers to arrays of column indices
 
-Vtype vTmp;                // temporary for applyForwardOp;
+Vtype vTmp;                                  // temporary for apply;
+std::vector<Vtype> vArrayTmp;                // temporary for apply;
 
 int  rowIndexCache;
 int     repackFlag;
