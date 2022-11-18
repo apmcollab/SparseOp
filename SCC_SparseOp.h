@@ -649,7 +649,7 @@ void apply(Vtype& V)
 
 void apply(std::vector<Vtype>& Varray)
 {
-    assert(matrixVectorDimCheck(rowCount,colCount,Varray[0].getSize(), V[0].getSize()));
+    assert(matrixVectorDimCheck(rowCount,colCount,Varray[0].getSize(), Varray[0].getSize()));
     vArrayTmp = Varray;
  
 #ifdef _OPENMP
@@ -690,6 +690,24 @@ void apply(const Vtype& Vin, Vtype& Vout) const
     }
 }
 
+
+/*!
+A convenience method to allow working with std::vector<double> vectors.
+
+*/
+void apply(const std::vector<double>& Vin,std::vector<double>& Vout) const
+{
+	assert(matrixVectorDimCheck(rowCount,colCount,(long)Vin.size(), (long)Vout.size()));
+    long i; long j;
+    for(i = 0; i < rowCount; i++)
+    {
+        Vout[i] = 0.0;
+        for(j = 0; j < rowFilledSizes[i]; j++)
+        {
+            Vout[i] += Vin[coeffColIndex[i][j]]*coeffValues[i][j];
+        }
+    }
+}
 
 /*!
 This method overwrites the input vector instance V with the values of (transpose S)*V
