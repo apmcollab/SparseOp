@@ -837,7 +837,7 @@ SparseOp& operator=(const SparseOp& rhs)
     }
 
     assert(matrixSumDimCheck(rowCount,colCount, rhs.rowCount, rhs.colCount));
-    if(this == &rhs) return *this;
+    if(this == &rhs) {return *this;}
     this->initialize(rhs);
     return *this;
 }
@@ -862,13 +862,14 @@ SparseOp& operator+=(const SparseOp& rhs)
             //check if *this operator has a nonzero in the same place as the rhs operator
             matched = false;
             for(jay=0; jay < rowFilledSizes[i]; jay++)
-                if(coeffColIndex[i][jay] == rhs.coeffColIndex[i][j]){
+            {
+            	if(coeffColIndex[i][jay] == rhs.coeffColIndex[i][j]){
                     setOperatorData(i,coeffColIndex[i][jay],coeffValues[i][jay]+rhs.coeffValues[i][j]);
                     matched = true;
                     break;
                 }
-            if(!matched)
-                setOperatorData(i,rhs.coeffColIndex[i][j],rhs.coeffValues[i][j]);
+            }
+            if(!matched) {setOperatorData(i,rhs.coeffColIndex[i][j],rhs.coeffValues[i][j]);}
         }
     }
     return *this;
@@ -948,13 +949,13 @@ SparseOp& operator-=(const SparseOp& rhs)
             //check if *this operator has a nonzero in the same place as the rhs operator
             matched = false;
             for(jay=0; jay < rowFilledSizes[i]; jay++)
+            {
                 if(coeffColIndex[i][jay] == rhs.coeffColIndex[i][j]){
                     setOperatorData(i,coeffColIndex[i][jay],coeffValues[i][jay]-rhs.coeffValues[i][j]);
                     matched = true;
-                    break;
-                }
-            if(!matched)
-                setOperatorData(i,rhs.coeffColIndex[i][j],-rhs.coeffValues[i][j]);
+                    break;}
+            }
+            if(!matched){setOperatorData(i,rhs.coeffColIndex[i][j],-rhs.coeffValues[i][j]);}
         }
     }
     return *this;
@@ -1124,7 +1125,7 @@ bool isSymmetric(double relTol = 1.0e-15)
         maxDiff = (maxDiff > diff) ? maxDiff : diff;
     }}
 
-    if(maxDiff > relTol) return false;
+    if(maxDiff > relTol) {return false;}
     return true;
 }
 
@@ -1233,7 +1234,7 @@ void applyLowerTriInverse(Vtype& V)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex <  i) Vsum -= V(jIndex)*coeffValues[i][j];
+            if(jIndex <  i) {Vsum -= V(jIndex)*coeffValues[i][j];}
             if(jIndex == i)
             {
              diag  = coeffValues[i][j];
@@ -1281,7 +1282,7 @@ void applyUpperTriInverse(Vtype& V)
         for(j = 0; j < rowFilledSizes[i]; j++)
         {
             jIndex = coeffColIndex[i][j];
-            if(jIndex >  i) Vsum -= V(jIndex)*coeffValues[i][j];
+            if(jIndex >  i) {Vsum -= V(jIndex)*coeffValues[i][j];}
             if(jIndex == i)
             {
              diag  = coeffValues[i][j];
@@ -1425,8 +1426,9 @@ void resizeRow(long rowIndex)
     {
         newSize = rowFilledSizes[rowIndex];
     }
-    if(newSize > colCount) newSize = colCount;
     
+    if(newSize > colCount) {newSize = colCount;}
+
 
     double* dataTemp  = new double[newSize];
     long*   indexTemp = new long[newSize];
