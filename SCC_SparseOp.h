@@ -762,11 +762,18 @@ void applyTranspose(const Vtype& Vin, Vtype& Vout) const
 }
 
 
-
 long getRowDimension() const {return rowCount;}
+
 long getColDimension() const {return colCount;}
 
-
+bool isNull()
+{
+    if((rowCount == 0)||(colCount == 0))
+    {
+    return true;
+    }
+    return false;
+}
 
 /*!
 Returns the number of non-zero elements in the matrix
