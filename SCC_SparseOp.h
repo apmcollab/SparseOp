@@ -502,7 +502,15 @@ void setOperatorData(long rowIndex, long colIndex, double coeffValue)
 class SparseOpRef
 {
         public:
+        
+        SparseOpRef()
+        {i = 0; j = 0; sparseOpPtr = nullptr;}
 
+        SparseOpRef(const SparseOpRef& S)
+        {i = S.i; j = S.j; sparseOpPtr = S.sparseOpPtr;}
+        
+        virtual ~SparseOpRef(){}
+        
         /// Used for extraction of SparseOp element value
 
         operator double() const
